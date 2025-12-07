@@ -2,8 +2,6 @@ package terminfo
 
 import (
 	"os"
-	"os/user"
-	"path"
 	"strings"
 	"sync"
 )
@@ -34,12 +32,6 @@ func Load(name string) (*Terminfo, error) {
 	if dir := os.Getenv("TERMINFO"); dir != "" {
 		checkDirs = append(checkDirs, dir)
 	}
-	// check $HOME/.terminfo
-	u, err := user.Current()
-	if err != nil {
-		return nil, err
-	}
-	checkDirs = append(checkDirs, path.Join(u.HomeDir, ".terminfo"))
 	// check $TERMINFO_DIRS
 	if dirs := os.Getenv("TERMINFO_DIRS"); dirs != "" {
 		checkDirs = append(checkDirs, strings.Split(dirs, ":")...)
@@ -47,7 +39,7 @@ func Load(name string) (*Terminfo, error) {
 	// check fallback directories
 	checkDirs = append(checkDirs, "/etc/terminfo", "/lib/terminfo", "/usr/share/terminfo")
 	for _, dir := range checkDirs {
-		ti, err = Open(dir, name)
+		ti, err := Open(dir, name)
 		if err != nil && err != ErrFileNotFound && !os.IsNotExist(err) {
 			return nil, err
 		} else if err == nil {
